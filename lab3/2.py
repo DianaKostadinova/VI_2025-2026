@@ -69,6 +69,17 @@ if __name__ == '__main__':
                         if r['capacity'] >= families[f]['size'] and \
                                 all(req in r['amenities'] for req in families[f]['requirements']):
                             return False
+
+                if f.startswith('VIP_'):
+                    for other_f, other_room in assignment.items():
+                        if other_room is None:
+                            continue
+                        if other_room.startswith("VIP_"):
+                            continue
+                        r = rooms[other_room]
+                        if r['capacity'] >= families[f]['size'] and \
+                                all(req in r['amenities'] for req in families[f]['requirements']):
+                            return False
         return True
 
 

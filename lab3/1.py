@@ -59,6 +59,22 @@ def solve(K, table):
                             [(i, j), (ni, nj)]
                         )
 
+    for idx in range(len(variables)):
+        for jdx in range(idx+1, len(variables)):
+            i1,j1 = variables[idx]
+            i2,j2 = variables[jdx]
+            r1= table[i1][j1]
+            r2 = table[i2][j2]
+            if r1 == r2:
+                continue
+            chebyshev = max(abs(i1 - i2), abs(j1 - j2))
+            weight_diff = abs(r1 - r2)
+            if chebyshev != weight_diff:
+
+                problem.addConstraint(
+                    lambda x, y: not (x == 1 and y == 1),
+                    [(i1, j1), (i2, j2)]
+                )
     return problem.getSolution()
 
 
