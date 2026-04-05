@@ -1,35 +1,35 @@
 from searching_framework import *
 
-dir = {'Gore': (1, 0), 'Desno': (0, 1)}
+dirs = {"Gore": (0, +1), "Desno": (+1, 0)}
+arr = [(1,0),(1,1),(-1,0),(-1,1),(0,-1),(0,1),(-1,-1),(1,-1)]
 
 class Boxes(Problem):
-    def __init__(self, initial, boxes, goal=None):
-        super().__init__(initial, goal)
-        self.boxes = set(boxes)
+    def __init__(self, initial, grid_size, box):
+        super().__init__(initial)
+        self.grid_size = grid_size
+        self.box = box
 
     def successor(self, state):
-        successors = {}
-        i, j, filled = state
+        successors = dict()
+        person_pos, nm_boxes, box_frozen = state
+        box = dict(box_frozen)
 
-        for action, (di, dj) in dir.items():
-            ni, nj = i + di, j + dj
-
-            if not (0 <= ni < n and 0 <= nj < n):
+        for action, (dx, dy) in dirs.items():
+            nx = person_pos[0] + dx
+            ny = person_pos[1] + dy
+            if not (0 <= nx < self.grid_size[0] and 0 <= ny < self.grid_size[1]):
                 continue
-            if (ni, nj) in self.boxes:
+            if (nx, ny) in box:
                 continue
-
-            new_filled = set(filled)
-
-            for ddi in [-1, 0, 1]:
-                for ddj in [-1, 0, 1]:
-                    if ddi == 0 and ddj == 0:
-                        continue
-                    neighbor = (ni + ddi, nj + ddj)
-                    if neighbor in self.boxes and neighbor not in new_filled:
-                        new_filled.add(neighbor)
-
-            successors[action] = (ni, nj, frozenset(new_filled))
+            newBox = dict(box)
+            newNm = nm_boxes
+            for (ax, ay) in arr:
+                adj = (nx + ax, ny + ay)
+                if adj in newBox and not newBox[adj]:
+                    newBox[adj] = True
+                    newNm -= 1
+                    break
+            successors[action] = (nx, ny), newNm, frozenset(newBox.items())
 
         return successors
 
@@ -40,26 +40,24 @@ class Boxes(Problem):
         return self.successor(state)[action]
 
     def goal_test(self, state):
-        _, _, filled = state
-        return len(filled) == len(self.boxes)
+        _, nm, _ = state
+        return nm == 0
 
 
 if __name__ == '__main__':
     n = int(input())
-    man_pos = (n-1, 0)
+    grid = (n, n)
+    nm_boxes = int(input())
+    boxes = {}
+    for _ in range(nm_boxes):
+        pos = tuple(map(int, input().split(",")))
+        boxes[pos] = False
 
-    num_boxes = int(input())
-    boxes = []
-
-    for _ in range(num_boxes):
-        boxes.append(tuple(map(int, input().split(','))))
-
-    initial = (man_pos[0], man_pos[1], frozenset())
-
-    problem = Boxes(initial, boxes)
-
+    person_pos = (0, 0)
+    boxes_frozen = frozenset(boxes.items())
+    initial = person_pos, nm_boxes, boxes_frozen
+    problem = Boxes(initial, grid, boxes)
     solution = breadth_first_graph_search(problem)
-
     if solution is None:
         print("No Solution!")
     else:
