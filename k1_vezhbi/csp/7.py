@@ -23,15 +23,15 @@ if __name__ == '__main__':
     R_vars = [f"R_lecture_{i + 1}" for i in range(lecture_slots_R)]
     BI_vars = [f"BI_lecture_{i + 1}" for i in range(lecture_slots_BI)]
 
-    if lecture_slots_AI > 0:
-        AI_lab = "AI_exercises"
-        problem.addVariable(AI_lab, AI_exercises_domain)
-    if lecture_slots_ML > 0:
-        ML_lab = "ML_exercises"
-        problem.addVariable(ML_lab, ML_exercises_domain)
-    if lecture_slots_BI > 0:
-        BI_lab = "BI_exercises"
-        problem.addVariable(BI_lab, BI_exercises_domain)
+
+    AI_lab = "AI_exercises"
+    problem.addVariable(AI_lab, AI_exercises_domain)
+
+    ML_lab = "ML_exercises"
+    problem.addVariable(ML_lab, ML_exercises_domain)
+
+    BI_lab = "BI_exercises"
+    problem.addVariable(BI_lab, BI_exercises_domain)
 
     for var in AI_vars:
         problem.addVariable(var, AI_lectures_domain)
@@ -43,12 +43,9 @@ if __name__ == '__main__':
         problem.addVariable(var, BI_lectures_domain)
 
     all_vars = AI_vars + ML_vars + R_vars + BI_vars
-    if lecture_slots_AI > 0:
-        all_vars.append(AI_lab)
-    if lecture_slots_ML > 0:
-        all_vars.append(ML_lab)
-    if lecture_slots_BI > 0:
-        all_vars.append(BI_lab)
+    all_vars.append(AI_lab)
+    all_vars.append(ML_lab)
+    all_vars.append(BI_lab)
 
     problem.addConstraint(AllDifferentConstraint(), all_vars)
 
