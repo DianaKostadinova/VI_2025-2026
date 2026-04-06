@@ -1,31 +1,38 @@
 from constraint import *
-
-if __name__ == '__main__':
-    n = 6
+if __name__ == "__main__":
+    problem = Problem(BacktrackingSolver())
     m = int(input())
-    trees = [tuple(map(int, input().split())) for _ in range(m)]
-
-    domain = []
-    for x in range(1, n):
-        for y in range(1, n):
-            if (x, y) not in trees:
-                domain.append((x, y))
-
-    problem = Problem()
-    problem.addVariables(range(m), domain)
-    problem.addConstraint(AllDifferentConstraint())
-
-    def not_adjacent(t1, t2):
-        return max(abs(t1[0] - t2[0]), abs(t1[1] - t2[1])) > 1
-
+    trees = []
     for i in range(m):
-        for j in range(i+1, m):
-            problem.addConstraint(not_adjacent, (i, j))
+        trees.append(tuple(map(int, input().split())))
+    domain = []
+    for i in range(6):
+        for j in range(6):
+            if (i,j) not in trees:
+                domain.append((i, j))
+    for i in range(m):
+        problem.addVariable(f"T{i}",domain)
+    problem.addConstraint(AllDifferentConstraint(), [f"T{i}" for i in range(m)])
+    def adj_tree(tent,tree):
+        tx,ty = tent
+        rx,ry = tree
+        return (abs(tx-rx) == 1 and ty==ry) or (abs(ty-ry)==1 and tx==rx)
 
+    for idx, tree in enumerate(trees):
+        problem.addConstraint(lambda tent, t=tree: adj_tree(t, tent), [f"T{idx}"])
+
+    def adj_tent(t1,t2):
+        x1,y1 = t1
+        x2,y2 = t2
+        return abs(x1-x2) >= 1 or abs(y1-y2) >= 1
+
+
+    tent_vars = [f"T{idx}" for idx in range(m)]
+    for i in range(m):
+        for j in range(i + 1, m):
+            problem.addConstraint(adj_tent, (tent_vars[i], tent_vars[j]))
     solution = problem.getSolution()
+    if solution:
+        for t, pos in solution.items():
+            print(f"{pos[0]} {pos[1]}")
 
-    if solution is None:
-        print("No solution")
-    else:
-        for i in sorted(solution):
-            print(f"{solution[i][0]} {solution[i][1]}")
