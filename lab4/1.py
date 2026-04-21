@@ -4,78 +4,54 @@ import math
 N, M, R = map(float, input().split())
 N = int(N)
 M = int(M)
-
 points = [tuple(map(float, input().split())) for _ in range(N)]
+
 
 def decode(solution):
     umbrellas = []
-
-    for i in range(M):
-        x = int(solution[i*3])
-        y = int(solution[i*3+1])
-        active = int(solution[i*3+2])
-
-        if active == 1:
+    for i in range(0, len(solution), 2):
+        x = solution[i]
+        y = solution[i + 1]
+        if 0 <= x <= 10 and 0 <= y <= 10:
             umbrellas.append((x, y))
-
     return umbrellas
+
+
+def distance(a, b):
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
 
 def fitness_func(ga, solution, idx):
     umbrellas = decode(solution)
     penalty = 0
 
-    # uncovered points
-    uncovered = 0
-    for px, py in points:
-        ok = False
-        for ux, uy in umbrellas:
-            if math.dist((px, py), (ux, uy)) < R:
-                ok = True
-                break
-        if not ok:
-            uncovered += 1
+    for p in points:
+        covered = any(distance(p, u) <= R for u in umbrellas)
+        if not covered:
+            penalty += 10000
 
-    if uncovered > 0:
-        penalty += uncovered * 100000
-
-    # overlaps
     for i in range(len(umbrellas)):
-        for j in range(i+1, len(umbrellas)):
-            d = math.dist(umbrellas[i], umbrellas[j])
-
+        for j in range(i + 1, len(umbrellas)):
+            d = distance(umbrellas[i], umbrellas[j])
             if d < 8 * R / 5:
                 penalty += 1000
-            elif d <= 2 * R:
+            elif d < 2 * R:
                 penalty += 100
 
-    # number of umbrellas
-    penalty += len(umbrellas) * 10
+    penalty += len(umbrellas) * 1
 
     return -penalty
 
 
-# SAME PRINCIPLE AS YOUR WORKING TASK
-gene_space = []
-
-for _ in range(M):
-    gene_space += [
-        list(range(0, 11)),  # x
-        list(range(0, 11)),  # y
-        [0, 1]               # active
-    ]
-
+gene_space = [{'low': 0, 'high': 10} for _ in range(2 * M)]
 
 params = {
-    'num_generations': 300,
-    'sol_per_pop': 80,
-    'num_parents_mating': 20,
-
-    'num_genes': 3 * M,
+    'num_generations': 500,
+    'sol_per_pop': 100,
+    'num_parents_mating': 50,
+    'num_genes': 2 * M,
     'gene_space': gene_space,
-
     'fitness_func': fitness_func,
-
     'mutation_num_genes': 1,
     'save_best_solutions': True
 }
@@ -89,3 +65,14 @@ best_solutions = ga.best_solutions
 
 print(solution)
 print(fitness)
+
+chromosomes = [
+
+    [9, 9, 9, 9, 9, 9],
+    [1, 1, 1.1, 1, 9, 9],
+    [1, 1, 1.1, 1, 5, 5],
+    [1, 1, 1.9, 1, 5, 5],
+    [1, 1, 5, 5, 9, 9],
+]
+
+#submit_data(fitness_func, decode, chromosomes, best_solutions)
