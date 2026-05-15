@@ -611,7 +611,7 @@ class Helper:
         elif sample_size == 1:
             if self.allow_duplicate_genes == True:
                 # Select a value randomly from the current gene space.
-                value_from_space = random.choice(value_from_space)
+                value_from_space = numpy.random.choice(value_from_space)
             else:
                 # We must check if the selected value will respect the allow_duplicate_genes parameter.
                 # Instead of selecting a value randomly, we have to select a value that will be unique if allow_duplicate_genes=False.
