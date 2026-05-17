@@ -1,6 +1,8 @@
 import os
 
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
+from sklearn.metrics import accuracy_score
+
 
 import warnings
 from sklearn.neural_network import MLPClassifier
@@ -426,4 +428,45 @@ data = [
      0.1302, 1]]
 
 if __name__ == '__main__':
-    ...
+    learning_rate = float(input())
+    epoch_num = int(input())
+
+
+    class_1 = [row for row in data if row[-1] == 0]
+    class_2 = [row for row in data if row[-1] == 1]
+
+    train_set = class_1[:int(0.8 * len(class_1))]+ \
+                class_2[:int(0.8 * len(class_2))]
+
+    val_set = class_1[int(0.8 * len(class_1)):] + \
+              class_2[int(0.8 * len(class_2)):]
+    train_x = [row[:-1] for row in train_set]
+    train_y = [row[-1] for row in train_set]
+
+    val_x = [row[:-1] for row in val_set]
+    val_y = [row[-1] for row in val_set]
+
+    clf = MLPClassifier(
+        hidden_layer_sizes=(6,),
+        activation='tanh',
+        learning_rate_init=learning_rate,
+        max_iter=epoch_num,
+        solver='adam',
+        random_state=0
+    )
+
+    clf.fit(train_x, train_y)
+    train_pred = clf.predict(train_x)
+    val_pred = clf.predict(val_x)
+
+    train_acc = accuracy_score(train_y, train_pred)
+    val_acc = accuracy_score(val_y, val_pred)
+
+    if train_acc - val_acc < 0.15:
+        print("Se sluchuva overfitting")
+    else:
+        print("Ne se sluchuva overfitting")
+    print(f"Tochnost so trenirachko mnozhestvo: {train_acc}")
+    print(f"Tochnost so validacisko mnozhestvo: {val_acc}")
+
+
